@@ -1,0 +1,4 @@
+# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
+tweepy==3.9.0
+# telethone==1.17.5
+asyncio==3.4.3
