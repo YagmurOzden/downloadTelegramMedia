@@ -7,7 +7,6 @@ WORKDIR /usr/src/app
 COPY Download_And_Tweet.py .
 COPY TelegramKeys.py .
 COPY keys.py .
-#i think its unnessery
 
 RUN mkdir media
 
