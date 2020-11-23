@@ -7,7 +7,7 @@ This project sends a tweet everday, which contains data about covid 19
 
 My application will send out tweets. It will be a twitter bot that tweets about the daily positive patients in Turkey. I will take data from telegram group and tweet it.
 
-For running python Tweepy.py: 
+For running python3 Tweepy.py: 
 $python Tweepy.py
 
 But for running in linux container :
