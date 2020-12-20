@@ -1,5 +1,6 @@
 import json
 
+from telethon.tl.types import InputMessagesFilterPhotos
 from telethon import TelegramClient, functions, types
 import os
 import asyncio
@@ -16,14 +17,10 @@ from tweepy import Stream
 
 import TelegramKeys
 import keys
-# # # # # TELEGRAM AUTHENTICATE # # # # #
-class TelegramAuthenticator():
-    
+# # # # # TELEGRAM AUTHENTICATE # # # # #lass TelegramAuthenticator():
     def __init__(self,api_id,api_hash,phone,username):
-
         self.api_id = TelegramKeys.api_id
         self.api_hash = TelegramKeys.api_hash
-
         self.phone = TelegramKeys.phone
         self.username = TelegramKeys.username
 
@@ -42,36 +39,30 @@ class Telegram:
             #         await client.sign_in(phone, input('Enter the code: '))
             #     except SessionPasswordNeededError:
             #         await client.sign_in(password=input('Password: '))
-            
-
-            async for message in client.iter_messages('https://t.me/turkuazgrafik'):
+            async for message in client.iter_messages('https://t.me/turkuazgrafik', filter=InputMessagesFilterPhotos):
                 if message.media is not None:
                     
                     A=str(message.media)
+                    #print(message.photo)
                     A=A.replace(" ","").replace("\n","").split("datetime")
                     date_time_str = A[2]
-            
                     date_time_str=date_time_str.replace("(","").replace(",tzinfo=","").split(",")
-                    
-                    #date_time_obj = str(datetime.datetime.strptime(date_time_str, '%Y,%m,%d,%H'))
+
                     x = datetime.datetime(int(date_time_str[0]),int(date_time_str[1]),int(date_time_str[2]))
                     x=str(x.strftime('%Y-%m-%d'))
-                    
-        
+
                     #todays date
                     today = str(datetime.datetime.now().strftime('%Y-%m-%d'))
                     today=today.split("-")
                     x=x.split("-")
-
-                    if today[0]==x[0] and today[1]==x[1] and today[2]==x[2] :
-
+                    
+                    if  int(today[0])==int(x[0]) and int(today[1])==int(x[1]) and  int(today[2])==int(x[2]):
                         await message.download_media("media")
+                        break
+                    #kanalda yazılan en son mesajı getir bu şekilde olmasın
 
-
-
-
-
-
+                    #belirli aralıklarla kodu kontrol edicez mesaj gelmiş mi diye.
+                    #oluşan cookie'yi tut her seferinde authenticate istemesin.
 
 
 
@@ -97,13 +88,15 @@ class TwitterClient():
 # # # # # SEND TWEET  # # # # #
 class PostTweet():
     def FileOperations():
+        # # #mkdir komutu yerine volume ekle. Dışarıdaki klasöre dışarıdan ulaşıp çekiyo.# # #
         os.chdir("media")
         dosyalar = os.listdir()
         Liste=[]
         for dosya in dosyalar:
             if dosya.endswith(".jpg"):
                 Liste.append(dosya)
-        return Liste[0]
+        else:
+            return Liste[-1]
 
     def postTweet(self):
         # Upload images and get media_ids
@@ -112,10 +105,35 @@ class PostTweet():
         for filename in filenames:
             res = twitter_api.media_upload(filename)
             media_ids.append(res.media_id)
-        # Tweet with multiple images
-        twitter_api.update_status(status='Vaka sayısı:', media_ids=media_ids)
 
+        #today's date as year-month-day
+        today = str(datetime.datetime.now().strftime('%Y-%m-%d'))
+        today=today.split("-")
+        #file name which is a date as year-month-day
+        x=filename.split("_")
+        x=x[1].split("-")
+        print(today,x)
+        if int(today[0])==int(x[0]) and int(today[1])==int(x[1]) and  int(today[2])==int(x[2]) :
+            # Tweet with multiple images
+            pass
+        return twitter_api.update_status(status='Vakasayısı:'+ today[2]+"-"+today[1]+"-"+today[0], media_ids=media_ids)
+        print("foto attı")
 
+        
+    def check_is_it_the_same(self):
+        #last tweet
+        lasttweet = twitter_api.user_timeline(id = twitter_api, count = 1)[0].text.split(" ")
+        today = str(datetime.datetime.now().strftime('%Y-%m-%d')).split("-")
+
+        myformat='Vakasayısı:'+ today[2]+"-"+today[1]+"-"+today[0]
+        print(lasttweet,today,myformat)
+        if lasttweet[0]==myformat:
+            print("This tweet is already send")
+            return 1
+            
+        else:
+            print("You can tweet it")
+            return 0
 if __name__=="__main__":
 
 
@@ -125,8 +143,6 @@ if __name__=="__main__":
     mediadownloader=Telegram()
 
     #loop = asyncio.get_event_loop()
-
-
     #asyncio.run(mediadownloader.downloadTelegramMedia())
     #task = asyncio(mediadownloader.downloadTelegramMedia())
     loop = asyncio.get_event_loop()
@@ -139,7 +155,9 @@ if __name__=="__main__":
 
     #for tweeting
     tweet=PostTweet()
-    tweet.postTweet()
-    
 
+    #this condition is for not posting the same tweet 
+    if tweet.check_is_it_the_same() ==0:
+        tweet.postTweet()    
+    
 
