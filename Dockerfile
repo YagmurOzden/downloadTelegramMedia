@@ -4,15 +4,16 @@ FROM ubuntu:18.04
 
 WORKDIR /usr/src/app
 
+COPY media .
+#the code below is for the cookies
+COPY YagmurOzden08.session .
 COPY Download_And_Tweet.py .
 COPY TelegramKeys.py .
 COPY keys.py .
-
-RUN mkdir media
+#media klasörünü buradan alma volume ile al.
 
 COPY requirements.txt .
 
-RUN apt-get update && apt-get install -y apt-transport-https
 RUN set -xe \
     && apt-get update \
     &&  apt -y install python3-pip
